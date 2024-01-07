@@ -17,11 +17,11 @@ func main() {
 
 	img := make(chan *image.RGBA, 1)
 	go func() {
-		p := Plot(-10, -10, 10, 100, f)
-		x := 5.0
+		p := Plot(-5, 0, 0.1, f)
+		x := 0.0
 		img <- p(x)
-		for i := 0; i < 200; i++ {
-			time.Sleep(20 * time.Millisecond)
+		for i := 0; i < 50; i++ {
+			time.Sleep(30 * time.Millisecond)
 			x -= fDeriv(x) * 0.1
 			img <- p(x)
 		}

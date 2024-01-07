@@ -13,13 +13,18 @@ import (
 	"gonum.org/v1/plot/vg/vgimg"
 )
 
-func Plot(xmin, ymin, xmax, ymax float64, f func(float64) float64) func(x float64) *image.RGBA {
+func Plot(xmin, xmax, xstep float64, f func(float64) float64) func(x float64) *image.RGBA {
+	var pts plotter.XYs
+	for x := xmin; x <= xmax; x += xstep {
+		pts = append(pts, plotter.XY{X: x, Y: f(x)})
+	}
+	fn, err := plotter.NewLine(pts)
+	if err != nil {
+		log.Fatalf("Failed to NewLine: %v", err)
+	}
+	fn.Color = color.RGBA{B: 255, A: 255}
 	return func(x float64) *image.RGBA {
-		fn := plotter.NewFunction(f)
-		fn.Color = color.RGBA{B: 255, A: 255}
-
 		pts := plotter.XYs{{X: x, Y: f(x)}}
-
 		xScatter, err := plotter.NewScatter(pts)
 		if err != nil {
 			log.Fatalf("Failed to NewScatter: %v", err)
@@ -46,8 +51,6 @@ func Plot(xmin, ymin, xmax, ymax float64, f func(float64) float64) func(x float6
 		p.Legend.Add("x", xScatter)
 		p.X.Label.Text = "X"
 		p.Y.Label.Text = "Y"
-		p.X.Min, p.Y.Min = xmin, ymin
-		p.X.Max, p.Y.Max = xmax, ymax
 
 		img := image.NewRGBA(image.Rect(0, 0, 640, 480))
 		c := vgimg.NewWith(vgimg.UseImage(img))
