@@ -7,11 +7,7 @@ import (
 )
 
 type App struct {
-	X      float64
-	F      func(float64) float64
-	FDeriv func(float64) float64
-	Img    <-chan *image.RGBA
-
+	Img <-chan *image.RGBA
 	img *ebiten.Image
 }
 

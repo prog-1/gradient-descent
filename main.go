@@ -27,13 +27,7 @@ func main() {
 		}
 	}()
 
-	app := &App{
-		X:      0,
-		F:      f,
-		FDeriv: df,
-		Img:    img,
-	}
-	if err := ebiten.RunGame(app); err != nil {
+	if err := ebiten.RunGame(&App{Img: img}); err != nil {
 		log.Fatal(err)
 	}
 }
