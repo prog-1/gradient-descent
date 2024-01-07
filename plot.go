@@ -8,6 +8,7 @@ import (
 
 	"gonum.org/v1/plot"
 	"gonum.org/v1/plot/plotter"
+	"gonum.org/v1/plot/vg"
 	"gonum.org/v1/plot/vg/draw"
 	"gonum.org/v1/plot/vg/vgimg"
 )
@@ -29,6 +30,7 @@ func Plot(xmin, ymin, xmax, ymax float64, f func(float64) float64) func(x float6
 			XYs:    pts,
 			Labels: []string{fmt.Sprintf("x = %.2f", x)},
 		})
+		labels.Offset = vg.Point{X: -10, Y: 15}
 		if err != nil {
 			log.Fatalf("Failed to NewLabels: %v", err)
 		}
