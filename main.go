@@ -47,7 +47,7 @@ func main() {
 		var stop bool
 		for !stop {
 			time.Sleep(30 * time.Millisecond)
-			x -= 0.9 * derivative(f)(x) // CONTROL ALPHA HERE FOR GRAPHICS
+			x -= 0.1 * derivative(f)(x) // CONTROL ALPHA HERE FOR GRAPHICS
 			// if you put alpha = 0.9, you wil get badly animated film about snake :)
 			if derivative(f)(x) == 0 || math.Abs(derivative(f)(x)) < 0.00001 {
 				stop = true
