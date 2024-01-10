@@ -37,3 +37,26 @@ func TestDerivative(t *testing.T) {
 		})
 	}
 }
+
+func TestGradientDescend(t *testing.T) {
+	for _, tc := range []struct {
+		name  string
+		f     func(float64) float64
+		x0    float64
+		alpha float64
+		want  float64
+	}{
+		{name: "constant", f: func(x float64) float64 { return 5 }, x0: 0.0, alpha: 0.01, want: 0.0},
+		{name: "simple square", f: func(x float64) float64 { return x * x }, x0: 2.0, alpha: 0.01, want: 0.0},
+		{name: "not so simple square", f: func(x float64) float64 { return x*x + 5*x - 3 }, x0: 1.0, alpha: 0.01, want: -2.5},
+		{name: "diff.135 lpp. N18 a)", f: func(x float64) float64 { return 2*x*x - 3*x }, x0: 3, alpha: 0.01, want: 0.75},
+		{name: "diff.135 lpp. N18 b)", f: func(x float64) float64 { return x*x - x + 2 }, x0: 0, alpha: 0.01, want: 0.5},
+	} {
+		t.Run("", func(t *testing.T) {
+			got := GradientDescent(tc.f, tc.x0, tc.alpha)
+			if math.Abs(got-tc.want) > 0.0001 {
+				t.Errorf("Expected GradientDescent(%f, %f) to be %f, but got %f", tc.x0, tc.alpha, tc.want, got)
+			}
+		})
+	}
+}
