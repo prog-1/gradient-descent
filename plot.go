@@ -52,7 +52,7 @@ func Plot(xmin, xmax, xstep float64, f func(float64) float64) func(x float64) *i
 		p.X.Label.Text = "X"
 		p.Y.Label.Text = "Y"
 
-		img := image.NewRGBA(image.Rect(0, 0, 640, 480))
+		img := image.NewRGBA(image.Rect(0, 0, screenWidth, screenHeight))
 		c := vgimg.NewWith(vgimg.UseImage(img))
 		p.Draw(draw.New(c))
 		return c.Image().(*image.RGBA)
