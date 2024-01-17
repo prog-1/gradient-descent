@@ -20,18 +20,18 @@ func df(x float64) float64 { return 4*x*x*x + 2*x + 5 }
 // }
 
 func main() {
+	p := NewRandomPoints(10)
+	l := NewLine()
+	err := l.Train(p, 0.001, 5000)
+	if err != nil {
+		log.Fatal(err)
+	}
 	ebiten.SetWindowSize(640, 480)
 	ebiten.SetWindowTitle("Gradient descent")
 
 	img := make(chan *image.RGBA, 1)
 	go func() {
-		points := NewRandomPoints(10)
-		l := NewLine()
-		err := l.Train(points, 0.01, 5000)
-		if err != nil {
-			log.Fatal(err)
-		}
-		p := Plot(-30, 30, 0.1, l.y)
+		p := Plot(-30, 30, 0.1, f)
 		x := 30.0
 		img <- p(x, false)
 		for i := 0; i < 500000; i++ {
