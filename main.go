@@ -3,7 +3,6 @@ package main
 import (
 	"image"
 	"log"
-	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -26,12 +25,18 @@ func main() {
 
 	img := make(chan *image.RGBA, 1)
 	go func() {
-		p := Plot(-10, 10, 0.1, f)
-		x := 5.0
+		points := NewRandomPoints(10)
+		l := NewLine()
+		err := l.Train(points, 0.01, 5000)
+		if err != nil {
+			log.Fatal(err)
+		}
+		p := Plot(-30, 30, 0.1, l.y)
+		x := 30.0
 		img <- p(x, false)
-		for i := 0; i < 5000; i++ {
-			time.Sleep(30 * time.Millisecond)
-			x -= df(x) * 0.001
+		for i := 0; i < 500000; i++ {
+			// time.Sleep( * time.Millisecond)
+			x -= df(x) * 1e-6
 			img <- p(x, false)
 		}
 
