@@ -13,23 +13,24 @@ import (
 const (
 	screenWidth, screenHeight                    = 720, 480
 	randMin, randMax                             = -10, 10
-	epochs, lr                                   = 5, 0.25
+	epochs, lr                                   = 1000000, 0.000005
 	plotMinX, plotMaxX, plotMinY, plotMaxY       = -10, 10, -50, 100 // Min and Max data values along both axis
 	pointMinYOffset, pointMaxYOffset, pointCount = -20, 20, 10
 )
 
 // Function points are spawed along
 func f(x float64) float64 {
-	return 0.5*x + 2
+	// return 0.5*x + 2
+	return 10*x - 5
 }
 
-// Approximating function(af) = Inference for 1 argument(x)
-func af(x, a, b float64) float64 { return a*x + b }
+// Inference for 1 argument(x)
+func i(x, w, b float64) float64 { return w*x + b }
 
 // Runs model on all the input data
 func inference(x []float64, w, b float64) (out []float64) {
 	for _, v := range x {
-		out = append(out, af(v, w, b))
+		out = append(out, i(v, w, b))
 	}
 	return
 }
@@ -57,16 +58,17 @@ func gradient(labels, y, x []float64) (dw, db float64) {
 }
 
 func train(epochs int, inputs, labels []float64) (w, b float64) {
-	// randFloat64 := func() float64 {
-	// 	return randMin + rand.Float64()*(randMax-randMin)
-	// }
-	// w, b = randFloat64(), randFloat64()
-	w, b = 1, 0
+	randFloat64 := func() float64 {
+		return randMin + rand.Float64()*(randMax-randMin)
+	}
+	w, b = randFloat64(), randFloat64()
+	// w, b = 1, 0
 	var dw, db float64
 	for i := 0; i < epochs; i++ {
 		dw, db = gradient(labels, inference(inputs, w, b), inputs)
 		w -= dw * lr
 		b -= db * lr
+		fmt.Println(w, b)
 	}
 	return
 }
