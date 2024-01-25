@@ -1,33 +1,47 @@
 package main
 
 import (
-	"image"
 	"log"
-	"time"
+	"math/rand"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-func f(x float64) float64  { return x*x + 5*x - 3 }
-func df(x float64) float64 { return 2*x + 5 }
+const (
+	numberOfPoints     = 20
+	pointMin, pointMax = 30, 70 //point distribution
+	lineMin, lineMax   = 0, 100 //line lenght
+)
 
 func main() {
-	ebiten.SetWindowSize(640, 480)
-	ebiten.SetWindowTitle("Gradient descent")
 
-	img := make(chan *image.RGBA, 1)
+	//####################### Linear Regression #########################
+
+	//Generating random points
+	px := make([]float64, numberOfPoints)
+	py := make([]float64, numberOfPoints)
+	for i := 0; i < numberOfPoints; i++ {
+		px[i] = (rand.Float64()*(pointMax-pointMin) + pointMin)
+		py[i] = (rand.Float64()*(pointMax-pointMin) + pointMin)
+	}
+
+	//####################### Ebiten ####################################
+
+	//Window
+	ebiten.SetWindowSize(sW, sH)
+	ebiten.SetWindowTitle("Linear Regression")
+
+	//App instance
+	a := NewApp(sW, sH)
+
+	//
 	go func() {
-		p := Plot(-5, 0, 0.1, f)
-		x := 0.0
-		img <- p(x)
-		for i := 0; i < 50; i++ {
-			time.Sleep(30 * time.Millisecond)
-			x -= df(x) * 0.1
-			img <- p(x)
-		}
+		a.linearRegression(px, py)
 	}()
 
-	if err := ebiten.RunGame(&App{Img: img}); err != nil {
+	//Running game
+	if err := ebiten.RunGame(a); err != nil {
 		log.Fatal(err)
 	}
+
 }

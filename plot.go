@@ -1,60 +1,64 @@
 package main
 
 import (
-	"fmt"
 	"image"
-	"image/color"
-	"log"
 
+	"github.com/hajimehoshi/ebiten/v2"
 	"gonum.org/v1/plot"
 	"gonum.org/v1/plot/plotter"
-	"gonum.org/v1/plot/vg"
 	"gonum.org/v1/plot/vg/draw"
 	"gonum.org/v1/plot/vg/vgimg"
 )
 
-func Plot(xmin, xmax, xstep float64, f func(float64) float64) func(x float64) *image.RGBA {
-	var pts plotter.XYs
-	for x := xmin; x <= xmax; x += xstep {
-		pts = append(pts, plotter.XY{X: x, Y: f(x)})
-	}
-	fn, err := plotter.NewLine(pts)
-	if err != nil {
-		log.Fatalf("Failed to NewLine: %v", err)
-	}
-	fn.Color = color.RGBA{B: 255, A: 255}
-	return func(x float64) *image.RGBA {
-		pts := plotter.XYs{{X: x, Y: f(x)}}
-		xScatter, err := plotter.NewScatter(pts)
-		if err != nil {
-			log.Fatalf("Failed to NewScatter: %v", err)
-		}
-		xScatter.Color = color.RGBA{R: 255, A: 255}
+// Converting plot to ebiten.Image
+func PlotToImage(p *plot.Plot) *ebiten.Image {
 
-		labels, err := plotter.NewLabels(plotter.XYLabels{
-			XYs:    pts,
-			Labels: []string{fmt.Sprintf("x = %.2f", x)},
-		})
-		labels.Offset = vg.Point{X: -10, Y: 15}
-		if err != nil {
-			log.Fatalf("Failed to NewLabels: %v", err)
-		}
+	img := image.NewRGBA(image.Rect(0, 0, sW, sH)) //creating image.RGBA to store the plot
 
-		p := plot.New()
-		p.Add(
-			plotter.NewGrid(),
-			fn,
-			xScatter,
-			labels,
-		)
-		p.Legend.Add("f(x)", fn)
-		p.Legend.Add("x", xScatter)
-		p.X.Label.Text = "X"
-		p.Y.Label.Text = "Y"
+	c := vgimg.NewWith(vgimg.UseImage(img)) //creating plot drawer for the image
 
-		img := image.NewRGBA(image.Rect(0, 0, 640, 480))
-		c := vgimg.NewWith(vgimg.UseImage(img))
-		p.Draw(draw.New(c))
-		return c.Image().(*image.RGBA)
+	p.Draw(draw.New(c)) //drawing plot on the image
+
+	return ebiten.NewImageFromImage(c.Image()) //converting image.RGBA to ebiten.Image (doing in Draw)
+	///Black screen issue: was giving "img" instead of "c.Image()" in the function.
+}
+
+// recreating plot with given data
+func (a *App) updatePlot(k, b float64, px, py []float64) {
+
+	p := plot.New() //initializing plot
+
+	//##################################################
+
+	//Line
+
+	linePoints := plotter.XYs{
+		{X: lineMin, Y: inference(lineMin, k, b)},
+		{X: lineMax, Y: inference(lineMax, k, b)},
 	}
+
+	line, _ := plotter.NewLine(linePoints) //creating line
+
+	p.Add(line) //adding line to the plot°
+
+	//##################################################
+
+	//Points
+
+	var points plotter.XYs //initializing point plotter
+
+	for i := 0; i < len(px); i++ {
+		points = append(points, plotter.XY{X: px[i], Y: py[i]}) //Saving all points in plotter
+	}
+
+	scatter, _ := plotter.NewScatter(points) //creating new scatter from point data
+
+	p.Add(scatter) //adding points to plot
+
+	//##################################################
+
+	//App
+
+	a.plot = p //replacing old plot with new one
+
 }
