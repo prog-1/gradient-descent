@@ -13,7 +13,7 @@ import (
 	"gonum.org/v1/plot/vg/vgimg"
 )
 
-func Plot(xmin, xmax, xstep float64, f func(float64) float64) func(x float64) *image.RGBA {
+func Plot(xmin, xmax, xstep float64, f func(float64) float64) func(x float64, isMinimum bool) *image.RGBA {
 	var pts plotter.XYs
 	for x := xmin; x <= xmax; x += xstep {
 		pts = append(pts, plotter.XY{X: x, Y: f(x)})
@@ -23,17 +23,23 @@ func Plot(xmin, xmax, xstep float64, f func(float64) float64) func(x float64) *i
 		log.Fatalf("Failed to NewLine: %v", err)
 	}
 	fn.Color = color.RGBA{B: 255, A: 255}
-	return func(x float64) *image.RGBA {
+	return func(x float64, isMinimum bool) *image.RGBA {
 		pts := plotter.XYs{{X: x, Y: f(x)}}
 		xScatter, err := plotter.NewScatter(pts)
 		if err != nil {
 			log.Fatalf("Failed to NewScatter: %v", err)
 		}
-		xScatter.Color = color.RGBA{R: 255, A: 255}
+		if isMinimum {
+			xScatter.Color = color.RGBA{G: 255, A: 255}
+
+		} else {
+			xScatter.Color = color.RGBA{R: 255, A: 255}
+
+		}
 
 		labels, err := plotter.NewLabels(plotter.XYLabels{
 			XYs:    pts,
-			Labels: []string{fmt.Sprintf("x = %.2f", x)},
+			Labels: []string{fmt.Sprintf("x = %.5f", x)},
 		})
 		labels.Offset = vg.Point{X: -10, Y: 15}
 		if err != nil {
