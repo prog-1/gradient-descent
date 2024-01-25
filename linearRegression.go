@@ -6,9 +6,9 @@ import (
 )
 
 const (
+	lrB    = 0.1
 	lrK    = 0.0001
-	lrB    = 0.0001
-	epochs = 10
+	epochs = 1000
 )
 
 //#######################################################################
@@ -29,7 +29,7 @@ func inference(x, k, b float64) float64 {
 	return k*x + b
 }
 
-func gradientDescent(k, b float64, px, py []float64) (float64, float64) {
+func gradientDescent(k, b float64, px, py []float64, epoch int) (float64, float64) {
 	dk, db := 0.0, 0.0 // gradients for coefficients
 	n := float64(len(px))
 	for i := range px {
@@ -40,15 +40,20 @@ func gradientDescent(k, b float64, px, py []float64) (float64, float64) {
 	}
 	k -= dk * lrK
 	b -= db * lrB
+	if epoch%100 == 0 {
+		fmt.Println("dk:", dk, "db:", db, "\n")
+	}
 	return k, b
 }
 
 func (a *App) linearRegression(px, py []float64) (k, b float64) {
 	for epoch := 1; epoch <= epochs; epoch++ {
-		k, b = gradientDescent(k, b, px, py)
+		if epoch%100 == 0 {
+			fmt.Println("Epoch:", epoch, "Loss:", loss(k, b, px, py))
+		}
+		k, b = gradientDescent(k, b, px, py, epoch)
 		a.updatePlot(k, b, px, py)
-		fmt.Println("Epoch:", epoch, "Loss:", loss(k, b, px, py))
-		time.Sleep(time.Second)
+		time.Sleep(time.Millisecond)
 	}
 
 	return k, b
